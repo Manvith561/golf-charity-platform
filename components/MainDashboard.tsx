@@ -24,10 +24,10 @@ export default function MainDashboard({ email }: { email: string }) {
 
     await fetch("/api/score", {
       method: "POST",
-      body: JSON.stringify({
-        email,
-        score: Number(score),
-      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, score: Number(score) }),
     });
 
     setScore("");
@@ -39,15 +39,12 @@ export default function MainDashboard({ email }: { email: string }) {
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white">
 
-      {/* TITLE */}
-      <h1 className="text-3xl font-bold mb-6">
-        Welcome Back 👋
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Welcome Back 👋</h1>
 
-      {/* INPUT + BUTTON */}
-      <div className="flex gap-3 mb-6">
+      {/* INPUT */}
+      <div className="flex gap-2 mb-6">
         <input
           value={score}
           onChange={(e) => setScore(e.target.value)}
@@ -62,34 +59,32 @@ export default function MainDashboard({ email }: { email: string }) {
         </button>
       </div>
 
-      {/* STATS CARD */}
-      <div className="bg-white/20 backdrop-blur-md p-5 rounded-xl shadow-lg mb-6 text-center">
+      {/* STATS */}
+      <div className="bg-white/20 backdrop-blur-md p-5 rounded-xl mb-6 text-center">
         <p>Games Played: {scores.length}</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards Earned: ₹{bestScore * 10}</p>
       </div>
 
-      {/* USER SCORES */}
-      <h2 className="font-semibold mb-2">Your Scores</h2>
+      {/* SCORES */}
+      <h2 className="mb-2 font-semibold">Your Scores</h2>
       <div className="mb-6">
         {scores.map((s, i) => (
           <p key={i}>
-            Score: {s.score} | Date: {new Date(s.createdAt).toLocaleDateString()}
+            {s.score} — {new Date(s.createdAt).toLocaleDateString()}
           </p>
         ))}
       </div>
 
       {/* LEADERBOARD */}
-      <h2 className="font-bold mb-3">🏆 Leaderboard</h2>
+      <h2 className="font-bold mb-2">🏆 Leaderboard</h2>
 
-      <div className="w-72">
+      <div className="w-64">
         {leaderboard.map((u, i) => (
           <div
             key={i}
-            className={`p-3 rounded-xl mb-2 text-center font-medium ${
-              i === 0
-                ? "bg-yellow-400 text-black"
-                : "bg-white/20 backdrop-blur-md"
+            className={`p-3 rounded mb-2 text-center ${
+              i === 0 ? "bg-yellow-400 text-black" : "bg-white/20"
             }`}
           >
             #{i + 1} — {u.email.split("@")[0]}  

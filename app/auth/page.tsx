@@ -8,46 +8,35 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
 
   const handleSubmit = async () => {
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          password,
-          isLogin,
-        }),
-      });
+    const res = await fetch("/api/auth", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, isLogin }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        alert(data.error || "Something went wrong");
-        return;
-      }
-
-      // ✅ SUCCESS
-      alert(isLogin ? "Login successful" : "Signup successful");
-
-      // ✅ SAVE USER
-      localStorage.setItem("user", email);
-
-      // ✅ REDIRECT
-      window.location.href = "/dashboard";
-
-    } catch (error) {
-      alert("Server error");
+    if (!res.ok) {
+      alert(data.error);
+      return;
     }
+
+    localStorage.setItem("user", email);
+    window.location.href = "/dashboard";
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-blue-600">
-      <div className="bg-white p-6 rounded shadow w-80 text-center">
-        <h2 className="text-xl font-bold mb-4">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-700">
+
+      <div className="bg-white p-8 rounded-xl shadow-xl w-80 text-center">
+
+        <h2 className="text-2xl font-bold mb-4">
           {isLogin ? "Login" : "Signup"}
         </h2>
 
         <input
-          type="email"
           placeholder="Email"
           className="w-full p-2 mb-3 border rounded"
           value={email}
@@ -64,7 +53,7 @@ export default function AuthPage() {
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-blue-500 text-white p-2 rounded"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
           {isLogin ? "Login" : "Signup"}
         </button>
@@ -77,6 +66,7 @@ export default function AuthPage() {
             ? "Don't have an account? Signup"
             : "Already have an account? Login"}
         </p>
+
       </div>
     </div>
   );
