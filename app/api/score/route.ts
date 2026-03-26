@@ -1,17 +1,51 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
+import connectDB from "@/lib/db";
 import Score from "@/models/Score";
 
 export async function POST(req: Request) {
-  await connectDB();
+  try {
+    await connectDB();
 
-  const { email, score } = await req.json();
+    const { email, score } = await req.json();
 
-  if (!email || !score) {
-    return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    if (!email || !score) {
+      return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    }
+
+    await Score.create({ email, score });
+
+    return NextResponse.json({ message: "Saved" });
+  } catch (error) {
+    console.log("ERROR:", error);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
+}
 
-  await Score.create({ email, score });
+export async function GET() {
+  try {
+    await connectDB();
 
-  return NextResponse.json({ message: "Saved" });
+    const scores = await Score.find().sort({ createdAt: -1 });
+
+    const leaderboard = await Score.aggregate([
+      {
+        $group: {
+          _id: "$email",
+          maxScore: { $max: "$score" },
+        },
+      },
+      { $sort: { maxScore: -1 } },
+      { $limit: 5 },
+    ]);
+
+    return NextResponse.json({
+      scores,
+      leaderboard: leaderboard.map((u) => ({
+        email: u._id,
+        score: u.maxScore,
+      })),
+    });
+  } catch (error) {
+    return NextResponse.json({ error: "Error" }, { status: 500 });
+  }
 }

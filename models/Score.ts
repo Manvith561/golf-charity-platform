@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 
-const ScoreSchema = new mongoose.Schema({
-  email: String,
-  score: Number,
-});
+const ScoreSchema = new mongoose.Schema(
+  {
+    email: String,
+    score: Number,
+  },
+  { timestamps: true }
+);
 
-export default mongoose.models.Score || mongoose.model("Score", ScoreSchema);
+export default mongoose.models.Score ||
+  mongoose.model("Score", ScoreSchema);
