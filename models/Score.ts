@@ -5,8 +5,8 @@ const ScoreSchema = new mongoose.Schema({
   score: Number,
   createdAt: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
 });
 
 export default mongoose.models.Score || mongoose.model("Score", ScoreSchema);
