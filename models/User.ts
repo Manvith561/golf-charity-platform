@@ -2,18 +2,18 @@ import mongoose from "mongoose";
 
 const ScoreSchema = new mongoose.Schema({
   score: Number,
-  date: { type: Date, default: Date.now },
+  date: Date,
 });
 
 const UserSchema = new mongoose.Schema({
   email: String,
   password: String,
-
-  // NEW
-  isSubscribed: { type: Boolean, default: true },
-  charity: { type: String, default: "Helping Hands" },
-
-  scores: [ScoreSchema],
+  charity: String,
+  isSubscribed: Boolean,
+  scores: {
+    type: [ScoreSchema],
+    default: [], // 🔥 IMPORTANT
+  },
 });
 
 export default mongoose.models.User ||

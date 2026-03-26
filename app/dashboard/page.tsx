@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const [score, setScore] = useState("");
-  const [scores, setScores] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
 
-  // ✅ LOAD USER + LEADERBOARD
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     setUser(storedUser);
@@ -22,7 +20,6 @@ export default function Dashboard() {
     setLeaderboard(data.leaderboard || []);
   };
 
-  // ✅ SAVE SCORE
   const saveScore = async () => {
     if (!score) return;
 
@@ -35,14 +32,11 @@ export default function Dashboard() {
     });
 
     setScore("");
-
-    // 🔥 IMPORTANT: refresh leaderboard after save
-    fetchLeaderboard();
+    fetchLeaderboard(); // 🔥 refresh leaderboard
   };
 
-  const bestScore = leaderboard.find(
-    (u) => u.email === user?.email
-  )?.score || 0;
+  const bestScore =
+    leaderboard.find((u) => u.email === user?.email)?.score || 0;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white px-4">
@@ -50,7 +44,9 @@ export default function Dashboard() {
       {/* HEADER */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold mb-2">Welcome Back 👋</h1>
-        <p className="opacity-80">Track your game. Win rewards. Give back.</p>
+        <p className="opacity-80">
+          Track your game. Win rewards. Give back.
+        </p>
       </div>
 
       {/* INPUT */}
@@ -58,13 +54,13 @@ export default function Dashboard() {
         <input
           type="number"
           placeholder="Enter score"
-          className="px-4 py-2 rounded-lg text-black w-52 outline-none shadow border border-black"
+          className="px-4 py-2 rounded-lg text-black w-52 border border-black outline-none"
           value={score}
           onChange={(e) => setScore(e.target.value)}
         />
         <button
           onClick={saveScore}
-          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold shadow-md"
+          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold"
         >
           Save
         </button>
@@ -72,7 +68,7 @@ export default function Dashboard() {
 
       {/* STATS */}
       <div className="bg-white text-black px-8 py-5 rounded-xl shadow-lg mb-8 text-center border border-black">
-        <p>Games Played: {scores.length}</p>
+        <p>Games Played: -</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards: ₹{bestScore * 10}</p>
       </div>

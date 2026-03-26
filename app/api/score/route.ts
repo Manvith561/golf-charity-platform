@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db"; // ✅ FIXED
+import connectDB from "@/lib/db";
 import User from "@/models/User";
 
+// ✅ SAVE SCORE
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -14,16 +15,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "User not found" });
     }
 
-    // ✅ ADD NEW SCORE WITH DATE
+    if (!user.scores) user.scores = [];
+
     user.scores.push({
-      score,
+      score: Number(score),
       date: new Date(),
     });
-
-    // ✅ KEEP ONLY LAST 5 SCORES
-    if (user.scores.length > 5) {
-      user.scores.shift();
-    }
 
     await user.save();
 
@@ -31,6 +28,36 @@ export async function POST(req: Request) {
       success: true,
       scores: user.scores,
     });
+
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: "Server error" });
+  }
+}
+
+// ✅ GET LEADERBOARD
+export async function GET() {
+  try {
+    await connectDB();
+
+    const users = await User.find();
+
+    const leaderboard = users
+      .map((u: any) => {
+        const bestScore =
+          u.scores && u.scores.length > 0
+            ? Math.max(...u.scores.map((s: any) => s.score))
+            : 0;
+
+        return {
+          email: u.email,
+          score: bestScore,
+        };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    return NextResponse.json({ leaderboard });
 
   } catch (error) {
     console.log(error);
