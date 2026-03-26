@@ -1,17 +1,24 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI as string;
+const MONGO_URI = process.env.MONGO_URI!;
 
-let isConnected = false;
+// FIX: use globalThis (works in Vercel)
+let cached = (globalThis as any).mongoose;
 
-export default async function connectDB() {
-  if (isConnected) return;
+if (!cached) {
+  cached = (globalThis as any).mongoose = {
+    conn: null,
+    promise: null,
+  };
+}
 
-  try {
-    await mongoose.connect(MONGO_URI);
-    isConnected = true;
-    console.log("MongoDB Connected");
-  } catch (error) {
-    console.log("DB ERROR:", error);
+export async function connectDB() {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGO_URI).then((mongoose) => mongoose);
   }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
 }
