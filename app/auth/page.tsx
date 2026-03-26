@@ -15,41 +15,35 @@ export default function AuthPage() {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
-
     if (res.ok) {
       alert("Signup successful");
+      window.location.href = "/";
     } else {
-      alert("Error");
+      alert("Signup failed");
     }
-
-    console.log(data);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-800">
-      <div className="bg-blue-900 p-8 rounded-xl shadow-lg w-80 text-center">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-800">
+      <div className="bg-white/10 p-8 rounded-xl backdrop-blur-md w-80 text-center">
         <h2 className="text-white text-xl mb-4">Signup</h2>
 
         <input
-          type="email"
+          className="w-full p-2 mb-3 rounded bg-white/20 text-white placeholder-white"
           placeholder="Email"
-          className="w-full mb-3 p-2 rounded"
-          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
+          className="w-full p-2 mb-4 rounded bg-white/20 text-white placeholder-white"
           placeholder="Password"
-          className="w-full mb-4 p-2 rounded"
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
           onClick={handleSignup}
-          className="w-full bg-white text-black p-2 rounded"
+          className="w-full bg-white text-black py-2 rounded"
         >
           Signup
         </button>

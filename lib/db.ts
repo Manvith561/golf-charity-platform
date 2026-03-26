@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGODB_URI as string;
-
 let isConnected = false;
 
-export const connectDB = async () => {
+export async function connectDB() {
   if (isConnected) return;
-  await mongoose.connect(MONGO_URI);
+
+  await mongoose.connect(process.env.MONGO_URI as string);
   isConnected = true;
-};
+}
