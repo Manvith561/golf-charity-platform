@@ -5,10 +5,13 @@ import Score from "@/models/Score";
 export async function POST(req: Request) {
   await connectDB();
 
-  const body = await req.json();
-  const { email, score } = body;
+  const { email, score } = await req.json();
 
-  const newScore = await Score.create({ email, score });
+  if (!email || !score) {
+    return NextResponse.json({ error: "Missing data" }, { status: 400 });
+  }
 
-  return NextResponse.json(newScore);
+  await Score.create({ email, score });
+
+  return NextResponse.json({ message: "Saved" });
 }
