@@ -2,112 +2,57 @@
 
 import { useState } from "react";
 
-export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async () => {
+  const handleSignup = async () => {
     const res = await fetch("/api/auth", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email,
-        password,
-        type: isLogin ? "login" : "signup",
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
 
-    if (data.message === "Login successful") {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("subscribed", "false");
-      window.location.href = "/dashboard";
-    } else if (data.message === "User created") {
-      alert("Signup successful! Now login.");
-      setIsLogin(true);
+    if (res.ok) {
+      alert("Signup successful");
     } else {
-      alert(data.message);
+      alert("Error");
     }
+
+    console.log(data);
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        background: "linear-gradient(to bottom, #0f172a, #1e3a8a)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <div
-        style={{
-          background: "rgba(255,255,255,0.1)",
-          padding: "30px",
-          borderRadius: "12px",
-          color: "white",
-          width: "300px",
-          textAlign: "center",
-        }}
-      >
-        <h2>{isLogin ? "Login" : "Signup"}</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-800">
+      <div className="bg-blue-900 p-8 rounded-xl shadow-lg w-80 text-center">
+        <h2 className="text-white text-xl mb-4">Signup</h2>
 
         <input
+          type="email"
           placeholder="Email"
+          className="w-full mb-3 p-2 rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "10px",
-            borderRadius: "8px",
-            border: "none",
-          }}
         />
 
         <input
           type="password"
           placeholder="Password"
+          className="w-full mb-4 p-2 rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginTop: "10px",
-            borderRadius: "8px",
-            border: "none",
-          }}
         />
 
         <button
-          onClick={handleSubmit}
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            width: "100%",
-            borderRadius: "8px",
-            border: "none",
-            background: "white",
-            color: "black",
-            cursor: "pointer",
-          }}
+          onClick={handleSignup}
+          className="w-full bg-white text-black p-2 rounded"
         >
-          {isLogin ? "Login" : "Signup"}
+          Signup
         </button>
-
-        <p
-          style={{ marginTop: "15px", cursor: "pointer", opacity: 0.7 }}
-          onClick={() => setIsLogin(!isLogin)}
-        >
-          {isLogin
-            ? "Don't have an account? Signup"
-            : "Already have an account? Login"}
-        </p>
       </div>
     </div>
   );
