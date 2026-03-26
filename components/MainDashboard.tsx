@@ -15,11 +15,13 @@ export default function MainDashboard({ email }: { email: string }) {
     const res = await fetch("/api/score");
     const data = await res.json();
 
-    setScores(data.userScores);
-    setLeaderboard(data.leaderboard);
+    setScores(data.userScores || []);
+    setLeaderboard(data.leaderboard || []);
   };
 
   const submitScore = async () => {
+    if (!score) return;
+
     await fetch("/api/score", {
       method: "POST",
       body: JSON.stringify({
@@ -37,46 +39,66 @@ export default function MainDashboard({ email }: { email: string }) {
     : 0;
 
   return (
-    <div className="flex flex-col items-center p-6 text-white">
-      <h1 className="text-2xl font-bold mb-4">Welcome Back 👋</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700 text-white">
 
-      <div className="mb-4">
+      {/* TITLE */}
+      <h1 className="text-3xl font-bold mb-6">
+        Welcome Back 👋
+      </h1>
+
+      {/* INPUT + BUTTON */}
+      <div className="flex gap-3 mb-6">
         <input
           value={score}
           onChange={(e) => setScore(e.target.value)}
           placeholder="Enter score"
-          className="p-2 text-black rounded mr-2"
+          className="px-4 py-2 rounded text-black w-48"
         />
         <button
           onClick={submitScore}
-          className="bg-green-500 px-4 py-2 rounded"
+          className="bg-green-400 text-black px-4 py-2 rounded font-semibold hover:bg-green-500"
         >
           Save Score
         </button>
       </div>
 
-      <div className="bg-white text-black p-4 rounded mb-4">
+      {/* STATS CARD */}
+      <div className="bg-white/20 backdrop-blur-md p-5 rounded-xl shadow-lg mb-6 text-center">
         <p>Games Played: {scores.length}</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards Earned: ₹{bestScore * 10}</p>
       </div>
 
-      <h2 className="font-bold mb-2">Your Scores</h2>
-      {scores.map((s, i) => (
-        <p key={i}>Score: {s.score}</p>
-      ))}
+      {/* USER SCORES */}
+      <h2 className="font-semibold mb-2">Your Scores</h2>
+      <div className="mb-6">
+        {scores.map((s, i) => (
+          <p key={i}>
+            Score: {s.score} | Date: {new Date(s.createdAt).toLocaleDateString()}
+          </p>
+        ))}
+      </div>
 
-      <h2 className="font-bold mt-4">🏆 Leaderboard</h2>
-      {leaderboard.map((u, i) => (
-        <div
-          key={i}
-          className={`p-2 rounded my-1 ${
-            i === 0 ? "bg-yellow-400 text-black" : "bg-white text-black"
-          }`}
-        >
-          {i + 1}. {u.email} - {u.score}
-        </div>
-      ))}
+      {/* LEADERBOARD */}
+      <h2 className="font-bold mb-3">🏆 Leaderboard</h2>
+
+      <div className="w-72">
+        {leaderboard.map((u, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-xl mb-2 text-center font-medium ${
+              i === 0
+                ? "bg-yellow-400 text-black"
+                : "bg-white/20 backdrop-blur-md"
+            }`}
+          >
+            #{i + 1} — {u.email.split("@")[0]}  
+            <br />
+            Score: {u.score}
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }
