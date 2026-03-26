@@ -47,15 +47,18 @@ export default function MainDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 text-white px-4">
 
       {/* TITLE */}
-      <h1 className="text-4xl font-bold mb-10 tracking-wide drop-shadow-lg">
-        Welcome Back 👋
-      </h1>
+      <h1 className="text-3xl font-bold mb-2">Welcome Back 👋</h1>
+
+      {/* SUBTITLE */}
+      <p className="mb-6 text-sm opacity-90 text-center">
+        Track your game. Win rewards. Give back.
+      </p>
 
       {/* INPUT */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex gap-3 mb-8">
         <input
           type="number"
           placeholder="Enter score"
@@ -65,38 +68,54 @@ export default function MainDashboard() {
         />
         <button
           onClick={saveScore}
-          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold shadow-md transition duration-200"
+          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold shadow-md"
         >
           Save Score
         </button>
       </div>
 
-      {/* STATS */}
-      <div className="bg-white text-black px-6 py-4 rounded-xl shadow-lg mb-8 w-72 text-center">
-        <p className="mb-1 font-medium">Games Played: {scores.length}</p>
-        <p className="mb-1 font-medium">Best Score: {bestScore}</p>
-        <p className="font-medium">Rewards: ₹{bestScore * 10}</p>
+      {/* STATS CARD */}
+      <div className="bg-white/20 backdrop-blur-lg px-8 py-5 rounded-2xl shadow-lg mb-8 text-center">
+        <p>Games Played: {scores.length}</p>
+        <p>Best Score: {bestScore}</p>
+        <p>Rewards Earned: ₹{bestScore * 10}</p>
+      </div>
+
+      {/* USER SCORES */}
+      <div className="mb-6 text-center">
+        <h2 className="font-semibold">Your Scores</h2>
+        {scores.slice(-1).map((s: any, i: number) => (
+          <p key={i} className="text-sm mt-1">
+            Score: {s.score} | Date: {new Date().toLocaleDateString()}
+          </p>
+        ))}
       </div>
 
       {/* LEADERBOARD */}
       <div className="w-80">
-        <h2 className="text-lg font-semibold mb-3 text-center">
+        <h2 className="text-lg font-semibold mb-4 text-center">
           🏆 Leaderboard
         </h2>
 
-        {leaderboard.map((u: any, i: number) => (
-          <div
-            key={i}
-            className={`flex justify-between px-4 py-3 mb-3 rounded-lg shadow-md ${
-              i === 0
-                ? "bg-yellow-300 text-black font-bold scale-105"
-                : "bg-white text-black"
-            }`}
-          >
-            <span>{i + 1}. {u.email}</span>
-            <span>{u.score}</span>
-          </div>
-        ))}
+        {leaderboard.map((u: any, i: number) => {
+          const medals = ["🥇", "🥈", "🥉"];
+
+          return (
+            <div
+              key={i}
+              className={`p-4 rounded-xl mb-3 text-center shadow-lg ${
+                i === 0
+                  ? "bg-yellow-300 text-black font-bold"
+                  : "bg-white/20 backdrop-blur-lg"
+              }`}
+            >
+              <div className="text-lg font-semibold">
+                {medals[i] || `#${i + 1}`} — {u.email.split("@")[0]}
+              </div>
+              <div className="text-sm">Score: {u.score}</div>
+            </div>
+          );
+        })}
       </div>
 
       {/* LOGOUT */}
