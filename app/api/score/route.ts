@@ -9,15 +9,20 @@ export async function POST(req: Request) {
     const { email, score } = await req.json();
 
     if (!email || !score) {
-      return NextResponse.json({ error: "Missing data" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Missing data" },
+        { status: 400 }
+      );
     }
 
     await Score.create({ email, score });
 
     return NextResponse.json({ message: "Saved" });
   } catch (error) {
-    console.log("ERROR:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -45,7 +50,7 @@ export async function GET() {
         score: u.maxScore,
       })),
     });
-  } catch (error) {
-    return NextResponse.json({ error: "Error" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ message: "Error" });
   }
 }
