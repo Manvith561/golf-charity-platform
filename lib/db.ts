@@ -1,18 +1,13 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = "mongodb+srv://manvithhegde35_db_user:manvith123@cluster0.qxg58od.mongodb.net/golfDB?retryWrites=true&w=majority";
-
-let isConnected = false;
-
 export async function connectDB() {
-  if (isConnected) return;
+  if (mongoose.connection.readyState === 1) return;
 
   try {
-    await mongoose.connect(MONGO_URI);
-    isConnected = true;
-    console.log("MongoDB Connected");
+    await mongoose.connect(process.env.MONGODB_URI as string);
+    console.log("MongoDB connected");
   } catch (error) {
-    console.log("DB Error:", error);
+    console.log("DB ERROR:", error);
     throw new Error("DB connection failed");
   }
 }
