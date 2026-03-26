@@ -1,48 +1,17 @@
-export const dynamic = "force-dynamic";
-
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Score from "@/models/Score";
 
-// GET leaderboard + scores
+// GET leaderboard
 export async function GET() {
   try {
     await connectDB();
 
-    // Get all scores
-    const scores = await Score.find();
+    const scores = await Score.find().sort({ score: -1 }).limit(5);
 
-    // Leaderboard aggregation
-    const leaderboard = await Score.aggregate([
-      {
-        $group: {
-          _id: "$email",
-          bestScore: { $max: "$score" },
-        },
-      },
-      {
-        $sort: { bestScore: -1 },
-      },
-      {
-        $limit: 5,
-      },
-    ]);
-
-    const formattedLeaderboard = leaderboard.map((item) => ({
-      email: item._id,
-      score: item.bestScore,
-    }));
-
-    return NextResponse.json({
-      scores,
-      leaderboard: formattedLeaderboard,
-    });
+    return NextResponse.json(scores);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Error fetching scores" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
 
@@ -54,17 +23,10 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { email, score } = body;
 
-    const newScore = await Score.create({
-      email,
-      score,
-    });
+    const newScore = await Score.create({ email, score });
 
     return NextResponse.json(newScore);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { message: "Error saving score" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
