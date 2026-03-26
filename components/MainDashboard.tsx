@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function MainDashboard({ email }: { email: string }) {
+export default function MainDashboard() {
+  const [score, setScore] = useState("");
   const [scores, setScores] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [score, setScore] = useState("");
+  const [bestScore, setBestScore] = useState(0);
+
+  const email =
+    typeof window !== "undefined" ? localStorage.getItem("user") : "";
 
   useEffect(() => {
     fetchScores();
@@ -17,82 +21,97 @@ export default function MainDashboard({ email }: { email: string }) {
 
     setScores(data.userScores || []);
     setLeaderboard(data.leaderboard || []);
+
+    if (data.userScores?.length > 0) {
+      setBestScore(Math.max(...data.userScores.map((s: any) => s.score)));
+    }
   };
 
-  const submitScore = async () => {
-    if (!score) return;
-
-    await fetch("/api/score", {
+  const saveScore = async () => {
+    const res = await fetch("/api/score", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, score: Number(score) }),
+      body: JSON.stringify({
+        email,
+        score: Number(score),
+      }),
     });
 
-    setScore("");
-    fetchScores();
+    const data = await res.json();
+
+    if (res.ok) {
+      setScore("");
+      fetchScores();
+    } else {
+      alert(data.error || "Error saving score");
+    }
   };
 
-  const bestScore = scores.length
-    ? Math.max(...scores.map((s) => s.score))
-    : 0;
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
 
-      <h1 className="text-3xl font-bold mb-6">Welcome Back 👋</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        Welcome Back 👋
+      </h1>
 
       {/* INPUT */}
       <div className="flex gap-2 mb-6">
         <input
+          type="number"
+          placeholder="Enter score"
+          className="p-2 rounded text-black"
           value={score}
           onChange={(e) => setScore(e.target.value)}
-          placeholder="Enter score"
-          className="px-4 py-2 rounded text-black w-48"
         />
         <button
-          onClick={submitScore}
-          className="bg-green-400 text-black px-4 py-2 rounded font-semibold hover:bg-green-500"
+          onClick={saveScore}
+          className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded"
         >
           Save Score
         </button>
       </div>
 
       {/* STATS */}
-      <div className="bg-white/20 backdrop-blur-md p-5 rounded-xl mb-6 text-center">
+      <div className="bg-white text-black p-5 rounded-xl shadow mb-6 text-center w-64">
         <p>Games Played: {scores.length}</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards Earned: ₹{bestScore * 10}</p>
       </div>
 
-      {/* SCORES */}
-      <h2 className="mb-2 font-semibold">Your Scores</h2>
-      <div className="mb-6">
-        {scores.map((s, i) => (
-          <p key={i}>
-            {s.score} — {new Date(s.createdAt).toLocaleDateString()}
-          </p>
+      {/* USER SCORES */}
+      <div className="mb-6 w-64">
+        <h2 className="font-semibold mb-2 text-center">Your Scores</h2>
+        {scores.map((s: any, i: number) => (
+          <div key={i} className="bg-white text-black p-2 rounded mb-2">
+            Score: {s.score}
+          </div>
         ))}
       </div>
 
       {/* LEADERBOARD */}
-      <h2 className="font-bold mb-2">🏆 Leaderboard</h2>
-
       <div className="w-64">
-        {leaderboard.map((u, i) => (
+        <h2 className="font-semibold mb-2 text-center">🏆 Leaderboard</h2>
+        {leaderboard.map((u: any, i: number) => (
           <div
             key={i}
-            className={`p-3 rounded mb-2 text-center ${
-              i === 0 ? "bg-yellow-400 text-black" : "bg-white/20"
+            className={`p-2 rounded mb-2 text-black ${
+              i === 0 ? "bg-yellow-300" : "bg-white"
             }`}
           >
-            #{i + 1} — {u.email.split("@")[0]}  
-            <br />
-            Score: {u.score}
+            {i + 1}. {u.email} - {u.score}
           </div>
         ))}
       </div>
+
+      {/* LOGOUT */}
+      <button
+        onClick={() => {
+          localStorage.removeItem("user");
+          window.location.href = "/auth";
+        }}
+        className="mt-6 underline"
+      >
+        Logout
+      </button>
 
     </div>
   );

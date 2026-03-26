@@ -5,51 +5,63 @@ import { useState } from "react";
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(false);
 
-  const handleSignup = async () => {
+  const handleSubmit = async () => {
     const res = await fetch("/api/auth", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, isLogin }),
     });
 
     const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message);
-      return;
+    if (res.ok) {
+      localStorage.setItem("user", email);
+      window.location.href = "/dashboard";
+    } else {
+      alert(data.message || "Error");
     }
-
-    alert(data.message);
-
-    localStorage.setItem("user", email);
-    window.location.href = "/dashboard";
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600">
-      <div className="bg-white p-6 rounded-xl shadow-xl w-80">
-        <h2 className="text-xl font-bold mb-4 text-center">Signup</h2>
+    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600">
+      
+      <div className="bg-white p-8 rounded-xl shadow-lg w-80 text-center">
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">
+          {isLogin ? "Login" : "Signup"}
+        </h1>
 
         <input
-          className="w-full border p-2 mb-3 rounded"
-          placeholder="Email"
+          type="email"
+          placeholder="Enter Email"
+          className="w-full p-3 mb-3 border rounded text-black"
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
-          className="w-full border p-2 mb-3 rounded"
-          placeholder="Password"
+          placeholder="Enter Password"
+          className="w-full p-3 mb-4 border rounded text-black"
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
-          onClick={handleSignup}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          onClick={handleSubmit}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded font-semibold"
         >
-          Signup
+          {isLogin ? "Login" : "Signup"}
         </button>
+
+        <p
+          onClick={() => setIsLogin(!isLogin)}
+          className="mt-4 text-sm text-blue-600 cursor-pointer"
+        >
+          {isLogin
+            ? "Don't have an account? Signup"
+            : "Already have an account? Login"}
+        </p>
       </div>
+
     </div>
   );
 }
