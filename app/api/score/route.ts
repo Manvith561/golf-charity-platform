@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import Score from "@/models/Score";
+import connectDB from "@/lib/db"; // ✅ FIXED
+import User from "@/models/User";
 
 export async function POST(req: Request) {
   try {
@@ -8,29 +8,32 @@ export async function POST(req: Request) {
 
     const { email, score } = await req.json();
 
-    // ✅ FIX: allow score = 0
-    if (!email || score === undefined) {
-      return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" });
     }
 
-    await Score.create({ email, score });
+    // ✅ ADD NEW SCORE WITH DATE
+    user.scores.push({
+      score,
+      date: new Date(),
+    });
 
-    return NextResponse.json({ message: "Saved" });
+    // ✅ KEEP ONLY LAST 5 SCORES
+    if (user.scores.length > 5) {
+      user.scores.shift();
+    }
+
+    await user.save();
+
+    return NextResponse.json({
+      success: true,
+      scores: user.scores,
+    });
+
   } catch (error) {
-    console.log("SCORE ERROR:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
-  }
-}
-
-export async function GET() {
-  try {
-    await connectDB();
-
-    const scores = await Score.find().sort({ score: -1 });
-
-    return NextResponse.json(scores);
-  } catch (error) {
-    console.log("GET ERROR:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    console.log(error);
+    return NextResponse.json({ error: "Server error" });
   }
 }

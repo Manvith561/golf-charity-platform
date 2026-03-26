@@ -1,41 +1,58 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
+import connectDB from "@/lib/db";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
 
+// 👉 SIGNUP
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const body = await req.json();
-    const { email, password } = body;
+    const { email, password, charity } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
-    }
-
+    // check if user exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      // ✅ LOGIN CASE
-      const isMatch = await bcrypt.compare(password, existingUser.password);
-
-      if (!isMatch) {
-        return NextResponse.json({ message: "Wrong password" }, { status: 400 });
-      }
-
-      return NextResponse.json({ message: "Login successful" });
+      return NextResponse.json({ error: "User already exists" });
     }
 
-    // ✅ SIGNUP CASE
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 🔥 CREATE USER WITH NEW FIELDS
+    const user = await User.create({
+      email,
+      password,
+      charity: charity || "Helping Hands", // default
+      isSubscribed: true, // fake subscription
+    });
 
-    await User.create({ email, password: hashedPassword });
-
-    return NextResponse.json({ message: "Signup successful" });
+    return NextResponse.json({
+      success: true,
+      user,
+    });
 
   } catch (error) {
-    console.log("AUTH ERROR:", error);
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: "Signup failed" });
+  }
+}
+
+// 👉 LOGIN
+export async function PUT(req: Request) {
+  try {
+    await connectDB();
+
+    const { email, password } = await req.json();
+
+    const user = await User.findOne({ email, password });
+
+    if (!user) {
+      return NextResponse.json({ error: "Invalid credentials" });
+    }
+
+    return NextResponse.json({
+      success: true,
+      user,
+    });
+
+  } catch (error) {
+    return NextResponse.json({ error: "Login failed" });
   }
 }
