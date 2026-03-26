@@ -8,6 +8,7 @@ export async function POST(req: Request) {
 
     const { email, score } = await req.json();
 
+    // ✅ FIX: allow score = 0
     if (!email || score === undefined) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "Saved" });
   } catch (error) {
+    console.log("SCORE ERROR:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
@@ -28,6 +30,7 @@ export async function GET() {
 
     return NextResponse.json(scores);
   } catch (error) {
+    console.log("GET ERROR:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

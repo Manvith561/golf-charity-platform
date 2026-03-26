@@ -25,6 +25,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "Signup successful" });
   } catch (error) {
+    console.log("AUTH ERROR:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

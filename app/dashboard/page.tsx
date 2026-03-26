@@ -9,10 +9,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     const user = localStorage.getItem("user");
-    if (!user) window.location.href = "/auth";
-    else setEmail(user);
 
-    fetchScores();
+    if (!user) {
+      window.location.href = "/auth";
+    } else {
+      setEmail(user);
+      fetchScores();
+    }
   }, []);
 
   const fetchScores = async () => {
@@ -22,9 +25,14 @@ export default function Dashboard() {
   };
 
   const saveScore = async () => {
+    if (!score) return alert("Enter score");
+
     await fetch("/api/score", {
       method: "POST",
-      body: JSON.stringify({ email, score: Number(score) }),
+      body: JSON.stringify({
+        email,
+        score: Number(score), // ✅ FIX
+      }),
     });
 
     setScore("");
@@ -48,7 +56,7 @@ export default function Dashboard() {
           placeholder="Enter score"
         />
         <button onClick={saveScore} className="bg-green-500 px-4 rounded">
-          Save
+          Save Score
         </button>
       </div>
 
