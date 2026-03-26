@@ -5,26 +5,18 @@ import { useState } from "react";
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [charity, setCharity] = useState("Helping Hands");
 
   const handleSignup = async () => {
     const res = await fetch("/api/auth", {
       method: "POST",
-      body: JSON.stringify({
-        email,
-        password,
-        charity, // ✅ send charity
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      // ✅ SAVE USER (IMPORTANT)
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      // 🔥 SAVE USER (CRITICAL)
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       window.location.href = "/dashboard";
     } else {
@@ -35,19 +27,14 @@ export default function AuthPage() {
   const handleLogin = async () => {
     const res = await fetch("/api/auth", {
       method: "PUT",
-      body: JSON.stringify({
-        email,
-        password,
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      // 🔥 SAVE USER (CRITICAL)
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       window.location.href = "/dashboard";
     } else {
@@ -64,7 +51,6 @@ export default function AuthPage() {
           Login / Signup
         </h2>
 
-        {/* EMAIL */}
         <input
           type="email"
           placeholder="Enter Email"
@@ -72,7 +58,6 @@ export default function AuthPage() {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* PASSWORD */}
         <input
           type="password"
           placeholder="Enter Password"
@@ -80,17 +65,6 @@ export default function AuthPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* 🔥 CHARITY DROPDOWN */}
-        <select
-          onChange={(e) => setCharity(e.target.value)}
-          className="w-full p-2 mb-3 border rounded"
-        >
-          <option>Helping Hands</option>
-          <option>Save Children</option>
-          <option>Food For All</option>
-        </select>
-
-        {/* BUTTONS */}
         <button
           onClick={handleSignup}
           className="w-full bg-blue-500 text-white p-2 rounded mb-2"
@@ -106,7 +80,6 @@ export default function AuthPage() {
         </button>
 
       </div>
-
     </div>
   );
 }

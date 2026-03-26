@@ -7,21 +7,34 @@ export default function Dashboard() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
 
+  // ✅ LOAD USER FROM LOCALSTORAGE
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    setUser(storedUser);
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      setUser(parsed);
+      console.log("USER LOADED:", parsed); // 🔥 DEBUG
+    }
 
     fetchLeaderboard();
   }, []);
 
+  // ✅ GET LEADERBOARD
   const fetchLeaderboard = async () => {
     const res = await fetch("/api/score");
     const data = await res.json();
     setLeaderboard(data.leaderboard || []);
   };
 
+  // ✅ SAVE SCORE
   const saveScore = async () => {
-    if (!score) return;
+    if (!score || !user?.email) {
+      alert("User not loaded");
+      return;
+    }
+
+    console.log("Saving score for:", user.email); // 🔥 DEBUG
 
     await fetch("/api/score", {
       method: "POST",
@@ -68,7 +81,6 @@ export default function Dashboard() {
 
       {/* STATS */}
       <div className="bg-white text-black px-8 py-5 rounded-xl shadow-lg mb-8 text-center border border-black">
-        <p>Games Played: -</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards: ₹{bestScore * 10}</p>
       </div>
