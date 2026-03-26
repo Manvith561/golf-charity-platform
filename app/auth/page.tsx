@@ -7,19 +7,25 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
 
   const handleSignup = async () => {
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (res.ok) {
-      alert("Signup successful");
-      window.location.href = "/";
-    } else {
-      alert("Signup failed");
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Signup successful");
+        window.location.href = "/";
+      } else {
+        alert(data.message || "Signup failed");
+      }
+    } catch (err) {
+      alert("Something went wrong");
     }
   };
 
