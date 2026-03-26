@@ -2,89 +2,81 @@
 
 import { useEffect, useState } from "react";
 
-export default function MainDashboad({ email }: any) {
-  const [score, setScore] = useState("");
+export default function MainDashboard({ email }: { email: string }) {
+  const [scores, setScores] = useState<any[]>([]);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [myScores, setMyScores] = useState<any[]>([]);
+  const [score, setScore] = useState("");
 
-  const fetchLeaderboard = async () => {
-    const res = await fetch("/api/leaderboard");
+  useEffect(() => {
+    fetchScores();
+  }, []);
+
+  const fetchScores = async () => {
+    const res = await fetch("/api/score");
     const data = await res.json();
-    setLeaderboard(data);
+
+    setScores(data.userScores);
+    setLeaderboard(data.leaderboard);
   };
 
-  const fetchMyScores = async () => {
-    const res = await fetch(`/api/myscore?email=${email}`);
-    const data = await res.json();
-    setMyScores(data);
-  };
-
-  const handleSave = async () => {
+  const submitScore = async () => {
     await fetch("/api/score", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, score: Number(score) }),
+      body: JSON.stringify({
+        email,
+        score: Number(score),
+      }),
     });
 
     setScore("");
-    fetchLeaderboard();
-    fetchMyScores();
+    fetchScores();
   };
 
-  useEffect(() => {
-    fetchLeaderboard();
-    fetchMyScores();
-  }, []);
-
-  const bestScore =
-    myScores.length > 0
-      ? Math.max(...myScores.map((s: any) => s.score))
-      : 0;
+  const bestScore = scores.length
+    ? Math.max(...scores.map((s) => s.score))
+    : 0;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-600 text-white">
-      <div className="w-full max-w-md text-center">
+    <div className="flex flex-col items-center p-6 text-white">
+      <h1 className="text-2xl font-bold mb-4">Welcome Back 👋</h1>
 
-        <h1 className="text-2xl font-bold">Welcome Back 👋</h1>
-
+      <div className="mb-4">
         <input
           value={score}
           onChange={(e) => setScore(e.target.value)}
           placeholder="Enter score"
-          className="p-2 rounded text-black mt-4"
+          className="p-2 text-black rounded mr-2"
         />
-
         <button
-          onClick={handleSave}
-          className="bg-yellow-400 px-4 py-2 rounded mt-2 text-black"
+          onClick={submitScore}
+          className="bg-green-500 px-4 py-2 rounded"
         >
           Save Score
         </button>
-
-        <div className="bg-white text-black p-4 rounded mt-4">
-          <p>Games Played: {myScores.length}</p>
-          <p>Best Score: {bestScore}</p>
-        </div>
-
-        <div className="mt-4">
-          <h2>Your Scores</h2>
-          {myScores.map((s, i) => (
-            <p key={i}>{s.score}</p>
-          ))}
-        </div>
-
-        <div className="mt-4">
-          <h2>🏆 Leaderboard</h2>
-          {leaderboard.map((u, i) => (
-            <div key={i} className="bg-white text-black p-2 my-2 rounded">
-              {i + 1}. {u.email} — {u.score}
-            </div>
-          ))}
-        </div>
-
       </div>
+
+      <div className="bg-white text-black p-4 rounded mb-4">
+        <p>Games Played: {scores.length}</p>
+        <p>Best Score: {bestScore}</p>
+        <p>Rewards Earned: ₹{bestScore * 10}</p>
+      </div>
+
+      <h2 className="font-bold mb-2">Your Scores</h2>
+      {scores.map((s, i) => (
+        <p key={i}>Score: {s.score}</p>
+      ))}
+
+      <h2 className="font-bold mt-4">🏆 Leaderboard</h2>
+      {leaderboard.map((u, i) => (
+        <div
+          key={i}
+          className={`p-2 rounded my-1 ${
+            i === 0 ? "bg-yellow-400 text-black" : "bg-white text-black"
+          }`}
+        >
+          {i + 1}. {u.email} - {u.score}
+        </div>
+      ))}
     </div>
   );
 }

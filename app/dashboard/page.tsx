@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import MainDashboard from "@/components/MainDashboard";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -16,7 +16,7 @@ export default function DashboardPage() {
     }
   }, []);
 
-  if (!user) return null;
+  if (!user) return <div>Loading...</div>;
 
   return <MainDashboard email={user} />;
 }
