@@ -73,10 +73,17 @@ export default function MainDashboard() {
         <input
           type="number"
           placeholder="Enter score"
-          className="px-4 py-2 rounded-lg text-black w-56 shadow-md outline-none border border-black/30"
           value={score}
           onChange={(e) => setScore(e.target.value)}
+          className="
+            px-4 py-2 w-56 rounded-lg text-black shadow-md outline-none
+            border-2 border-black
+            focus:border-green-500
+            focus:ring-2 focus:ring-green-300
+            transition
+          "
         />
+
         <button
           onClick={saveScore}
           className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold shadow-md"
@@ -85,21 +92,11 @@ export default function MainDashboard() {
         </button>
       </div>
 
-      {/* STATS CARD */}
-      <div className="bg-white/20 backdrop-blur-lg px-8 py-5 rounded-2xl shadow-lg mb-8 text-center border border-white/30">
+      {/* STATS */}
+      <div className="bg-white/20 backdrop-blur-lg px-8 py-5 rounded-2xl shadow-lg mb-8 text-center">
         <p>Games Played: {scores.length}</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards Earned: ₹{bestScore * 10}</p>
-      </div>
-
-      {/* USER SCORES */}
-      <div className="mb-6 text-center">
-        <h2 className="font-semibold">Your Scores</h2>
-        {scores.slice(-1).map((s: any, i: number) => (
-          <p key={i} className="text-sm mt-1">
-            Score: {s.score} | Date: {new Date().toLocaleDateString()}
-          </p>
-        ))}
       </div>
 
       {/* LEADERBOARD */}
@@ -109,21 +106,12 @@ export default function MainDashboard() {
         </h2>
 
         {leaderboard.map((u: any, i: number) => {
-          const medals = ["🥇", "🥈", "🥉"];
-
           return (
             <div
               key={i}
-              className={`p-4 rounded-xl mb-3 text-center shadow-lg ${
-                i === 0
-                  ? "bg-yellow-300 text-black font-bold"
-                  : "bg-white/20 backdrop-blur-lg border border-white/30"
-              }`}
+              className="p-4 rounded-xl mb-3 text-center shadow-lg bg-white text-black"
             >
-              <div className="text-lg font-semibold">
-                {medals[i] || `#${i + 1}`} — {u.email.split("@")[0]}
-              </div>
-              <div className="text-sm">Score: {u.score}</div>
+              {i + 1}. {u.email} - {u.score}
             </div>
           );
         })}
