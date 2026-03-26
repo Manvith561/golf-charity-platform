@@ -5,74 +5,108 @@ import { useEffect, useState } from "react";
 export default function Dashboard() {
   const [score, setScore] = useState("");
   const [scores, setScores] = useState<any[]>([]);
-  const [email, setEmail] = useState("");
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
 
+  // ✅ LOAD USER + LEADERBOARD
   useEffect(() => {
-    const user = localStorage.getItem("user");
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    setUser(storedUser);
 
-    if (!user) {
-      window.location.href = "/auth";
-    } else {
-      setEmail(user);
-      fetchScores();
-    }
+    fetchLeaderboard();
   }, []);
 
-  const fetchScores = async () => {
+  const fetchLeaderboard = async () => {
     const res = await fetch("/api/score");
     const data = await res.json();
-    setScores(data);
+    setLeaderboard(data.leaderboard || []);
   };
 
+  // ✅ SAVE SCORE
   const saveScore = async () => {
-    if (!score) return alert("Enter score");
+    if (!score) return;
 
     await fetch("/api/score", {
       method: "POST",
       body: JSON.stringify({
-        email,
-        score: Number(score), // ✅ FIX
+        email: user.email,
+        score: Number(score),
       }),
     });
 
     setScore("");
-    fetchScores();
+
+    // 🔥 IMPORTANT: refresh leaderboard after save
+    fetchLeaderboard();
   };
 
-  const userScores = scores.filter((s) => s.email === email);
-  const bestScore = userScores.length
-    ? Math.max(...userScores.map((s) => s.score))
-    : 0;
+  const bestScore = leaderboard.find(
+    (u) => u.email === user?.email
+  )?.score || 0;
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-400 to-blue-600 text-white">
-      <h1 className="text-2xl mb-4">Welcome Back 👋</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white px-4">
 
-      <div className="flex gap-2">
+      {/* HEADER */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-2">Welcome Back 👋</h1>
+        <p className="opacity-80">Track your game. Win rewards. Give back.</p>
+      </div>
+
+      {/* INPUT */}
+      <div className="bg-white/20 backdrop-blur-lg p-5 rounded-2xl shadow-xl flex gap-3 mb-8 border border-black">
         <input
+          type="number"
+          placeholder="Enter score"
+          className="px-4 py-2 rounded-lg text-black w-52 outline-none shadow border border-black"
           value={score}
           onChange={(e) => setScore(e.target.value)}
-          className="p-2 text-black rounded"
-          placeholder="Enter score"
         />
-        <button onClick={saveScore} className="bg-green-500 px-4 rounded">
-          Save Score
+        <button
+          onClick={saveScore}
+          className="bg-green-500 hover:bg-green-600 px-5 py-2 rounded-lg font-semibold shadow-md"
+        >
+          Save
         </button>
       </div>
 
-      <div className="bg-white text-black p-4 mt-4 rounded">
-        <p>Games Played: {userScores.length}</p>
+      {/* STATS */}
+      <div className="bg-white text-black px-8 py-5 rounded-xl shadow-lg mb-8 text-center border border-black">
+        <p>Games Played: {scores.length}</p>
         <p>Best Score: {bestScore}</p>
         <p>Rewards: ₹{bestScore * 10}</p>
       </div>
 
-      <h2 className="mt-4">Leaderboard</h2>
+      {/* LEADERBOARD */}
+      <div className="w-80">
+        <h2 className="text-lg font-semibold mb-4 text-center">
+          🏆 Leaderboard
+        </h2>
 
-      {scores.slice(0, 5).map((s, i) => (
-        <div key={i} className="bg-white text-black p-2 mt-2 rounded w-60">
-          {i + 1}. {s.email} - {s.score}
-        </div>
-      ))}
+        {leaderboard.map((u: any, i: number) => (
+          <div
+            key={i}
+            className={`p-3 rounded-lg mb-2 border border-black text-center ${
+              i === 0
+                ? "bg-yellow-300 text-black font-bold"
+                : "bg-white text-black"
+            }`}
+          >
+            {i + 1}. {u.email} - {u.score}
+          </div>
+        ))}
+      </div>
+
+      {/* LOGOUT */}
+      <button
+        onClick={() => {
+          localStorage.removeItem("user");
+          window.location.href = "/auth";
+        }}
+        className="mt-10 underline"
+      >
+        Logout
+      </button>
     </div>
   );
 }
