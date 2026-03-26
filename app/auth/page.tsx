@@ -6,7 +6,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = async () => {
+  const handleSubmit = async () => {
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
@@ -19,36 +19,39 @@ export default function AuthPage() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Signup successful");
-        window.location.href = "/";
+        alert(data.message || "Signup successful");
+        window.location.href = "/login";
       } else {
-        alert(data.message || "Signup failed");
+        alert(data.message || "Error");
       }
-    } catch (err) {
-      alert("Something went wrong");
+    } catch (error) {
+      alert("Server error");
     }
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-800">
-      <div className="bg-white/10 p-8 rounded-xl backdrop-blur-md w-80 text-center">
-        <h2 className="text-white text-xl mb-4">Signup</h2>
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700">
+      <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-lg w-[300px] text-center">
+        <h2 className="text-white text-2xl mb-4">Signup</h2>
 
         <input
-          className="w-full p-2 mb-3 rounded bg-white/20 text-white placeholder-white"
-          placeholder="Email"
+          type="email"
+          placeholder="Enter email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-3 p-2 rounded bg-white/20 text-white placeholder-white outline-none"
         />
 
         <input
           type="password"
-          className="w-full p-2 mb-4 rounded bg-white/20 text-white placeholder-white"
-          placeholder="Password"
+          placeholder="Enter password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-4 p-2 rounded bg-white/20 text-white placeholder-white outline-none"
         />
 
         <button
-          onClick={handleSignup}
+          onClick={handleSubmit}
           className="w-full bg-white text-black py-2 rounded"
         >
           Signup

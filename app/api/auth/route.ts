@@ -9,6 +9,10 @@ export async function POST(req: Request) {
 
     const { email, password } = await req.json();
 
+    if (!email || !password) {
+      return NextResponse.json({ message: "Missing fields" }, { status: 400 });
+    }
+
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -22,6 +26,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Signup successful" }, { status: 201 });
 
   } catch (error) {
+    console.log("API ERROR:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
