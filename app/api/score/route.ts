@@ -1,60 +1,70 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Score from "@/models/Score";
 
-export async function POST(req: Request) {
-  await dbConnect();
+// GET leaderboard + scores
+export async function GET() {
+  try {
+    await connectDB();
 
-  const { email, score } = await req.json();
+    // Get all scores
+    const scores = await Score.find();
 
-  if (!email || score === undefined) {
-    return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    // Leaderboard aggregation
+    const leaderboard = await Score.aggregate([
+      {
+        $group: {
+          _id: "$email",
+          bestScore: { $max: "$score" },
+        },
+      },
+      {
+        $sort: { bestScore: -1 },
+      },
+      {
+        $limit: 5,
+      },
+    ]);
+
+    const formattedLeaderboard = leaderboard.map((item) => ({
+      email: item._id,
+      score: item.bestScore,
+    }));
+
+    return NextResponse.json({
+      scores,
+      leaderboard: formattedLeaderboard,
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Error fetching scores" },
+      { status: 500 }
+    );
   }
-
-  const newScore = new Score({
-    email,
-    score,
-    createdAt: new Date(),
-  });
-
-  await newScore.save();
-
-  return NextResponse.json({ message: "Score saved" });
 }
 
-export async function GET(req: Request) {
-  await dbConnect();
+// POST new score
+export async function POST(req: Request) {
+  try {
+    await connectDB();
 
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email");
+    const body = await req.json();
+    const { email, score } = body;
 
-  let scores = [];
-  if (email) {
-    scores = await Score.find({ email }).sort({ createdAt: -1 });
+    const newScore = await Score.create({
+      email,
+      score,
+    });
+
+    return NextResponse.json(newScore);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Error saving score" },
+      { status: 500 }
+    );
   }
-
-  const leaderboard = await Score.aggregate([
-    {
-      $group: {
-        _id: "$email",
-        bestScore: { $max: "$score" },
-      },
-    },
-    {
-      $sort: { bestScore: -1 },
-    },
-    {
-      $limit: 5,
-    },
-  ]);
-
-  const formattedLeaderboard = leaderboard.map((item) => ({
-    email: item._id,
-    score: item.bestScore,
-  }));
-
-  return NextResponse.json({
-    scores,
-    leaderboard: formattedLeaderboard,
-  });
 }
